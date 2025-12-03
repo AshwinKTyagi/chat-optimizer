@@ -1,0 +1,33 @@
+{
+  "testPrompts": [
+
+    {"intent": "direct_product_search", "text": "cemento holcim 50kg"},
+    {"intent": "direct_product_search", "text": "pintura blanca para interiores"},
+    {"intent": "direct_product_search","text": "tubería pvc 2 pulgadas"},
+
+    {"intent": "attribute_based_search","text": "cerámica antideslizante 60x60"},
+    {"intent": "attribute_based_search","text": "pernos galvanizados 3/8"},
+    {"intent": "attribute_based_search","text": "cables eléctricos 12 AWG"},
+
+    {"intent": "problem_solving_search","text": "cómo nivelar un piso desnivelado"},
+    {"intent": "problem_solving_search","text": "solución para humedad en paredes"},
+    {"intent": "problem_solving_search","text": "qué usar para impermeabilizar terraza"},
+
+    {"intent": "comparison_search","text": "pintura acrílica vs vinílica"},
+    {"intent": "comparison_search","text": "cemento portland vs cemento rápido"},
+    {"intent": "comparison_search","text": "mejor marca de drywall"},
+
+    {"intent": "project_based_search","text": "materiales para construir pérgola"},
+    {"intent": "project_based_search","text": "qué necesito para instalar un baño"},
+    {"intent": "project_based_search","text": "herramientas para remodelar cocina"},
+
+    {"intent": "bulk_or_budget_search","text": "cemento al por mayor"},
+    {"intent": "bulk_or_budget_search","text": "materiales económicos para cerramiento"},
+    {"intent": "bulk_or_budget_search","text": "presupuesto para 20 m2 de cerámica"},
+
+    {"intent": "price_query","text": "precio de cemento Holcim 50kg"},
+    {"intent": "price_query","text": "cuánto cuesta tubería PVC"},
+    {"intent": "price_query","text": "precio de cerámica 60x60"}
+    
+  ]
+}

@@ -1,8 +1,10 @@
 /**
  * VectorEmbeddingService
  * Handles text embeddings and vector similarity search.
- * Uses OpenAI if OPENAI_API_KEY is set, otherwise falls back to a deterministic hash-based embedding.
+ * Uses Ollama (nomic-embed-model) with deterministic hash-based embedding fallback.
  */
+
+import { sampleIntentDocuments } from '../data/sampleDocuments';
 
 type EmbeddingVector = number[];
 
@@ -22,66 +24,75 @@ export class VectorEmbeddingService {
   }
 
   private initializeSampleDocuments() {
-    const sampleDocs: IntentDocument[] = [
-      { id: 'greeting', intent: 'greeting', text: 'hi hello hey greetings good morning' },
-      { id: 'billing', intent: 'billing', text: 'billing invoice charge payment subscription cost price' },
-      { id: 'support', intent: 'support', text: 'error bug issue technical support help troubleshoot' }
-    ];
-
-    sampleDocs.forEach((doc) => {
+    sampleIntentDocuments.forEach((doc) => {
       this.documents.set(doc.id, doc);
     });
   }
 
   /**
    * Get embedding for a given text.
-   * Calls OpenAI API if OPENAI_API_KEY is set; otherwise uses deterministic fallback.
+   * Uses Ollama (nomic-embed-model) with deterministic fallback if Ollama is unavailable.
    */
   async getEmbedding(text: string): Promise<EmbeddingVector> {
     if (this.cachedVectors.has(text)) {
       return this.cachedVectors.get(text)!;
     }
 
-    let vector: EmbeddingVector;
+    let vector: EmbeddingVector | null = null;
 
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (apiKey) {
-      vector = await this.getOpenAIEmbedding(text, apiKey);
-    } else {
-      vector = this.getDeterministicEmbedding(text);
+    // Try Ollama first
+    // Use 127.0.0.1 explicitly to avoid IPv6 resolution issues
+    const ollamaUrl = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
+    const ollamaModel = process.env.OLLAMA_EMBED_MODEL || 'nomic-embed-text';
+    
+    if (process.env.USE_OLLAMA !== 'false') {
+      vector = await this.getOllamaEmbedding(text, ollamaUrl, ollamaModel);
+      if (vector) {
+        this.cachedVectors.set(text, vector);
+        return vector;
+      }
     }
 
+    // Fallback to deterministic embedding if Ollama fails or is disabled
+    vector = this.getDeterministicEmbedding(text);
     this.cachedVectors.set(text, vector);
     return vector;
   }
 
   /**
-   * Call OpenAI embeddings API.
+   * Call Ollama embeddings API for nomic-embed-model.
    */
-  private async getOpenAIEmbedding(text: string, apiKey: string): Promise<EmbeddingVector> {
+  private async getOllamaEmbedding(text: string, baseUrl: string, model: string): Promise<EmbeddingVector | null> {
     try {
-      const res = await fetch('https://api.openai.com/v1/embeddings', {
+      const res = await fetch(`${baseUrl}/api/embeddings`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'text-embedding-3-small',
-          input: text
+          model: model,
+          prompt: text
         })
       });
 
+      if (!res.ok) {
+        console.error(`Ollama embedding error: ${res.status} ${res.statusText}`);
+        return null;
+      }
+
       const data = await res.json();
-      if (data.data && data.data[0] && Array.isArray(data.data[0].embedding)) {
-        return data.data[0].embedding as EmbeddingVector;
+      if (data.embedding && Array.isArray(data.embedding)) {
+        return data.embedding as EmbeddingVector;
       }
     } catch (err) {
-      console.error('OpenAI embedding error:', err);
+      // Silently fallback to deterministic embedding if Ollama is unavailable
+      // Only log if explicitly debugging (set DEBUG_OLLAMA=true)
+      if (process.env.DEBUG_OLLAMA === 'true') {
+        console.error('Ollama embedding error:', err);
+      }
     }
 
-    // Fallback if OpenAI fails
-    return this.getDeterministicEmbedding(text);
+    return null;
   }
 
   /**
@@ -107,17 +118,18 @@ export class VectorEmbeddingService {
    */
   async findNearestIntent(text: string, topK: number = 1) {
     const vector = await this.getEmbedding(text);
-    return this.findNearestVector(vector, topK);
+    return await this.findNearestVector(vector, topK);
   }
 
   /**
    * Find the nearest intent document(s) to a given vector.
    */
-  private findNearestVector(vector: EmbeddingVector, topK: number = 1) {
+  private async findNearestVector(vector: EmbeddingVector, topK: number = 1) {
     const results: Array<{ intent: string; score: number; text: string }> = [];
 
     for (const [_id, doc] of this.documents) {
-      const docVector = this.getDeterministicEmbedding(doc.text);
+      // Get embedding for document text using the same method as query
+      const docVector = await this.getEmbedding(doc.text);
       const score = this.cosineSimilarity(vector, docVector);
       results.push({
         intent: doc.intent,
