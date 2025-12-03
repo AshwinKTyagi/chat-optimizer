@@ -4,6 +4,7 @@ import { vectorEmbeddingService } from '../../../../services/VectorEmbeddingServ
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+
     const { message } = body || {};
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'Invalid payload: { message: string } expected' }, { status: 400 });
@@ -13,6 +14,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ intent: matches[0] ?? null, candidates: matches });
   } catch (err) {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 500 });
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Embedding route error:', err);
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

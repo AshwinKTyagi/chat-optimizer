@@ -19,6 +19,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ vectorMatches: matches, slm: slmResult });
   } catch (err) {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 500 });
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Hybrid route error:', err);
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
