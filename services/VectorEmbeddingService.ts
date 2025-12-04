@@ -18,6 +18,7 @@ interface IntentDocument {
 export class VectorEmbeddingService {
   private documents: Map<string, IntentDocument> = new Map();
   private cachedVectors: Map<string, EmbeddingVector> = new Map();
+  private readonly confidenceThreshold = 0.6;
 
   constructor() {
     this.initializeSampleDocuments();
@@ -139,6 +140,18 @@ export class VectorEmbeddingService {
     }
 
     results.sort((a, b) => b.score - a.score);
+
+    const topMatch = results[0];
+    if (!topMatch || topMatch.score < this.confidenceThreshold) {
+      return [
+        {
+          intent: 'toFallback',
+          score: topMatch?.score ?? 0,
+          text: 'Confidence below threshold'
+        }
+      ];
+    }
+
     return results.slice(0, topK);
   }
 

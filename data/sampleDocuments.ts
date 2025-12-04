@@ -71,6 +71,21 @@ export const sampleIntentDocuments: SampleIntentDocument[] = [
   { id: "G2", intent: "price_query", text: "cuánto cuesta la tubería PVC 1 pulgada" },
   { id: "G3", intent: "price_query", text: "pintura para interiores precio por galón" },
   { id: "G4", intent: "price_query", text: "precio de cerámica 60x60 antideslizante" },
-  { id: "G5", intent: "price_query", text: "cuánto valen las láminas de drywall 1/2" }
+  { id: "G5", intent: "price_query", text: "cuánto valen las láminas de drywall 1/2" },
+
+  //------------------------------------
+  // H. Navigation
+  //------------------------------------
+  { id: "H1", intent: "navigation", text: "Ir al panel principal" },
+  { id: "H2", intent: "navigation", text: "Muéstrame la página de productos" },
+  { id: "H3", intent: "navigation", text: "Abrir sección de facturas" },
+
+  //------------------------------------
+  // I. Navigation with Parameters
+  //------------------------------------
+  { id: "I1", intent: "navigation_with_parameters", text: "Ver facturas del último mes" },
+  { id: "I2", intent: "navigation_with_parameters", text: "Muéstrame productos filtrados por categoría eléctricos" },
+  { id: "I3", intent: "navigation_with_parameters", text: "Listar cotizaciones entre enero y marzo" }
+
 ];
 
