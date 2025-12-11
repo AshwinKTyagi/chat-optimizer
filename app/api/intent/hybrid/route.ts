@@ -10,14 +10,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid payload: { message: string } expected' }, { status: 400 });
     }
 
-    const matches = await vectorEmbeddingService.findNearestIntent(message, 3);
+    const { matches, durationMs: vectorDurationMs } = await vectorEmbeddingService.findNearestIntent(message, 3);
     
     // Build context from top embedding matches
     const context = matches.map((m) => `${m.intent}: ${m.text}`).join('\n');
 
     const slmResult = await slmService.classifyIntent(message, context);
 
-    return NextResponse.json({ vectorMatches: matches, slm: slmResult });
+    return NextResponse.json({
+      vectorMatches: matches,
+      vectorDurationMs,
+      slm: slmResult
+    });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
     console.error('Hybrid route error:', err);

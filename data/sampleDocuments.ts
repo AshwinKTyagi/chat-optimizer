@@ -9,27 +9,27 @@ export const sampleIntentDocuments: SampleIntentDocument[] = [
   // A. Direct Product Searches
   // Pure product mentions: brand/model/format. No price/budget/comparison words.
   //------------------------------------
-  { id: "A1", intent: "direct_product_search", text: "bolsa de cemento Holcim 50kg" },
-  { id: "A2", intent: "direct_product_search", text: "tubería PVC de 1 pulgada para agua potable" },
-  { id: "A3", intent: "direct_product_search", text: "pintura blanca lavable para interiores marca Sherwin" },
-  { id: "A4", intent: "direct_product_search", text: "plancha de yeso de 1/2 pulgada tipo drywall" },
-  { id: "A5", intent: "direct_product_search", text: "interruptor eléctrico blanco marca Schneider" },
-  { id: "A6", intent: "direct_product_search", text: "porcelanato 60x60 beige para piso" },
-  { id: "A7", intent: "direct_product_search", text: "malla electrosoldada 6mm en rollo" },
-  { id: "A8", intent: "direct_product_search", text: "taladro inalámbrico Dewalt 20V" },
+  { id: "A1", intent: "product_search", text: "bolsa de cemento Holcim 50kg" },
+  { id: "A2", intent: "product_search", text: "tubería PVC de 1 pulgada para agua potable" },
+  { id: "A3", intent: "product_search", text: "pintura blanca lavable para interiores marca Sherwin" },
+  { id: "A4", intent: "product_search", text: "plancha de yeso de 1/2 pulgada tipo drywall" },
+  { id: "A5", intent: "product_search", text: "interruptor eléctrico blanco marca Schneider" },
+  { id: "A6", intent: "product_search", text: "porcelanato 60x60 beige para piso" },
+  { id: "A7", intent: "product_search", text: "malla electrosoldada 6mm en rollo" },
+  { id: "A8", intent: "product_search", text: "taladro inalámbrico Dewalt 20V" },
 
   //------------------------------------
   // B. Attribute-Based Searches
   // Focus on specs/characteristics, often generic or “any brand” phrasing.
   //------------------------------------
-  { id: "B1", intent: "attribute_based_search", text: "cerámica 60x60 antideslizante para exterior, cualquier marca" },
-  { id: "B2", intent: "attribute_based_search", text: "pernos galvanizados de 3/8 x 4 pulgadas como especificación" },
-  { id: "B3", intent: "attribute_based_search", text: "ventanas de aluminio serie 25 sin importar la marca" },
-  { id: "B4", intent: "attribute_based_search", text: "cables eléctricos calibre 12 AWG para instalación doméstica" },
-  { id: "B5", intent: "attribute_based_search", text: "malla electrosoldada de 6 mm como característica del producto" },
-  { id: "B6", intent: "attribute_based_search", text: "teja metálica calibre 28 color rojo como especificación" },
-  { id: "B7", intent: "attribute_based_search", text: "pintura para interiores con acabado mate y lavable" },
-  { id: "B8", intent: "attribute_based_search", text: "tubería para agua caliente que soporte alta presión y temperatura" },
+  { id: "B1", intent: "product_search", text: "cerámica 60x60 antideslizante para exterior, cualquier marca" },
+  { id: "B2", intent: "product_search", text: "pernos galvanizados de 3/8 x 4 pulgadas como especificación" },
+  { id: "B3", intent: "product_search", text: "ventanas de aluminio serie 25 sin importar la marca" },
+  { id: "B4", intent: "product_search", text: "cables eléctricos calibre 12 AWG para instalación doméstica" },
+  { id: "B5", intent: "product_search", text: "malla electrosoldada de 6 mm como característica del producto" },
+  { id: "B6", intent: "product_search", text: "teja metálica calibre 28 color rojo como especificación" },
+  { id: "B7", intent: "product_search", text: "pintura para interiores con acabado mate y lavable" },
+  { id: "B8", intent: "product_search", text: "tubería para agua caliente que soporte alta presión y temperatura" },
 
   //------------------------------------
   // C. Problem-Solving Searches

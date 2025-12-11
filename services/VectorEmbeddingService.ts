@@ -15,6 +15,17 @@ interface IntentDocument {
   vector?: EmbeddingVector;
 }
 
+export interface VectorMatch {
+  intent: string;
+  score: number;
+  text: string;
+}
+
+export interface VectorIntentResponse {
+  matches: VectorMatch[];
+  durationMs: number;
+}
+
 export class VectorEmbeddingService {
   private documents: Map<string, IntentDocument> = new Map();
   private cachedVectors: Map<string, EmbeddingVector> = new Map();
@@ -117,16 +128,21 @@ export class VectorEmbeddingService {
   /**
    * Find the nearest intent document to a given text.
    */
-  async findNearestIntent(text: string, topK: number = 1) {
+  async findNearestIntent(text: string, topK: number = 1): Promise<VectorIntentResponse> {
+    const startedAt = Date.now();
     const vector = await this.getEmbedding(text);
-    return await this.findNearestVector(vector, topK);
+    const matches = await this.findNearestVector(vector, topK);
+    return {
+      matches,
+      durationMs: Date.now() - startedAt
+    };
   }
 
   /**
    * Find the nearest intent document(s) to a given vector.
    */
-  private async findNearestVector(vector: EmbeddingVector, topK: number = 1) {
-    const results: Array<{ intent: string; score: number; text: string }> = [];
+  private async findNearestVector(vector: EmbeddingVector, topK: number = 1): Promise<VectorMatch[]> {
+    const results: VectorMatch[] = [];
 
     for (const [_id, doc] of this.documents) {
       // Get embedding for document text using the same method as query
