@@ -9,13 +9,13 @@ export async function POST(req: Request) {
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'Invalid payload: { message: string } expected' }, { status: 400 });
     }
-
-    const { matches, durationMs } = await vectorEmbeddingService.findNearestIntent(message, 3);
+    const { scores, durationMs, averageTopKScore } = await vectorEmbeddingService.findNearestIntent(message, 3);
 
     return NextResponse.json({
-      intent: matches[0] ?? null,
-      candidates: matches,
-      durationMs
+      intent: scores[0] ?? null,
+      scores,
+      durationMs,
+      averageTopKScore
     });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';

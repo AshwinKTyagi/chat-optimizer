@@ -1,10 +1,11 @@
 /**
  * VectorEmbeddingService
  * Handles text embeddings and vector similarity search.
- * Uses Ollama (nomic-embed-model) with deterministic hash-based embedding fallback.
+ * Uses Ollama (nomic-embed-text) with deterministic hash-based embedding fallback.
  */
 
 import { sampleIntentDocuments } from '../data/sampleDocuments';
+import { ruleRouter, ScoreMap, createEmptyScoreMap } from './SoftGate';
 
 type EmbeddingVector = number[];
 
@@ -18,12 +19,12 @@ interface IntentDocument {
 export interface VectorMatch {
   intent: string;
   score: number;
-  text: string;
 }
 
 export interface VectorIntentResponse {
-  matches: VectorMatch[];
+  scores: VectorMatch[];
   durationMs: number;
+  averageTopKScore: number;
 }
 
 export class VectorEmbeddingService {
@@ -43,7 +44,7 @@ export class VectorEmbeddingService {
 
   /**
    * Get embedding for a given text.
-   * Uses Ollama (nomic-embed-model) with deterministic fallback if Ollama is unavailable.
+   * Uses Ollama (nomic-embed-text) with deterministic fallback if Ollama is unavailable.
    */
   async getEmbedding(text: string): Promise<EmbeddingVector> {
     if (this.cachedVectors.has(text)) {
@@ -131,44 +132,55 @@ export class VectorEmbeddingService {
   async findNearestIntent(text: string, topK: number = 1): Promise<VectorIntentResponse> {
     const startedAt = Date.now();
     const vector = await this.getEmbedding(text);
-    const matches = await this.findNearestVector(vector, topK);
+    const scores = await this.findNearestVector(text, vector, topK);
+    const averageTopKScore = this.topKSimilarity(scores, topK);
+
     return {
-      matches,
-      durationMs: Date.now() - startedAt
+      scores,
+      durationMs: Date.now() - startedAt,
+      averageTopKScore
     };
   }
 
   /**
    * Find the nearest intent document(s) to a given vector.
    */
-  private async findNearestVector(vector: EmbeddingVector, topK: number = 1): Promise<VectorMatch[]> {
-    const results: VectorMatch[] = [];
+  private async findNearestVector(queryText: string, vector: EmbeddingVector, topK: number = 1): Promise<VectorMatch[]> {
+    const bestByIntent = new Map<string, VectorMatch>();
 
     for (const [_id, doc] of this.documents) {
       // Get embedding for document text using the same method as query
       const docVector = await this.getEmbedding(doc.text);
       const score = this.cosineSimilarity(vector, docVector);
-      results.push({
-        intent: doc.intent,
-        score,
-        text: doc.text
-      });
+
+      const existing = bestByIntent.get(doc.intent);
+      if (!existing || score > existing.score) {
+        bestByIntent.set(doc.intent, {
+          intent: doc.intent,
+          score
+        });
+      }
     }
 
-    results.sort((a, b) => b.score - a.score);
-
-    const topMatch = results[0];
-    if (!topMatch || topMatch.score < this.confidenceThreshold) {
-      return [
-        {
-          intent: 'toFallback',
-          score: topMatch?.score ?? 0,
-          text: 'Confidence below threshold'
-        }
-      ];
+    const baseScores: Partial<ScoreMap> = {};
+    for (const [intent, match] of bestByIntent) {
+      baseScores[intent as keyof ScoreMap] = match.score;
     }
 
-    return results.slice(0, topK);
+    const { boosted } = ruleRouter(queryText, baseScores);
+
+    for (const [intent, match] of bestByIntent) {
+      const adjusted = boosted[intent as keyof ScoreMap];
+      if (typeof adjusted === 'number' && !Number.isNaN(adjusted)) {
+        match.score = adjusted;
+      }
+    }
+
+    const sortedBoosted = Object.entries(boosted).sort((a, b) => b[1] - a[1]);
+    
+    const topKMatches = sortedBoosted.slice(0, topK).map(([intent, score]) => ({ intent, score }));
+
+    return topKMatches;
   }
 
   /**
@@ -187,6 +199,19 @@ export class VectorEmbeddingService {
     }
 
     return dot / (Math.sqrt(magA) * Math.sqrt(magB) || 1);
+  }
+
+  private topKSimilarity(scores: VectorMatch[], topK: number): number {
+    const rankedValues = scores
+      .filter((score) => typeof score === 'number' && !Number.isNaN(score) && score > 0)
+      .sort((a, b) => b - a);
+
+    if (!rankedValues.length || topK <= 0) {
+      return 0;
+    }
+    const slice = rankedValues.slice(0, topK);
+    const total = slice.reduce((sum, value) => sum + value, 0);
+    return total / slice.length;
   }
 
   /**
