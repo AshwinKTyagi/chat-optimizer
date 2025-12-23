@@ -30,6 +30,19 @@ export const sampleIntentDocuments: SampleIntentDocument[] = [
   { id: "B6", intent: "product_search", text: "teja metálica calibre 28 color rojo como especificación" },
   { id: "B7", intent: "product_search", text: "pintura para interiores con acabado mate y lavable" },
   { id: "B8", intent: "product_search", text: "tubería para agua caliente que soporte alta presión y temperatura" },
+  { id: "B9", intent: "product_search", text: "Mostrar productos con precio menor a 20 dólares" },
+  { id: "PS1", intent: "product_search", text: "bolsa de cemento Holcim 50kg" },
+  { id: "PS2", intent: "product_search", text: "tubería PVC de 1 pulgada para agua potable" },
+  { id: "PS3", intent: "product_search", text: "porcelanato 60x60 beige para piso" },
+  { id: "PS4", intent: "product_search", text: "cerámica 60x60 antideslizante para exterior" },
+  // { id: "PS5", intent: "product_search", text: "plancha de drywall 1/2 pulgada" },
+  // { id: "PS6", intent: "product_search", text: "malla electrosoldada 6mm en rollo" },
+  // { id: "PS7", intent: "product_search", text: "varilla corrugada 3/8 de acero" },
+  // { id: "PS8", intent: "product_search", text: "tubo HDPE 32mm por metro" },
+  // { id: "PS9", intent: "product_search", text: "pintura blanca lavable para interiores" },
+  { id: "PS10", intent: "product_search", text: "impermeabilizante acrílico para techos" },
+  { id: "PS11", intent: "product_search", text: "cable eléctrico calibre 12 AWG" },
+  { id: "PS12", intent: "product_search", text: "interruptor eléctrico blanco marca Schneider" },
 
   //------------------------------------
   // C. Problem-Solving Searches
@@ -43,6 +56,14 @@ export const sampleIntentDocuments: SampleIntentDocument[] = [
   { id: "C6", intent: "problem_solving_search", text: "cómo reparar un techo que tiene goteras" },
   { id: "C7", intent: "problem_solving_search", text: "material para evitar que el piso suene al caminar" },
   { id: "C8", intent: "problem_solving_search", text: "qué producto sirve para detener la humedad por capilaridad" },
+  { id: "C9", intent: "problem_solving_search", text: "se me está filtrando agua en la terraza, cómo la impermeabilizo" },
+  { id: "C10", intent: "problem_solving_search", text: "las paredes interiores se están manchando de humedad, alguna solución" },
+  { id: "C11", intent: "problem_solving_search", text: "qué me sirve para pegar cerámica en patio exterior" },
+  { id: "C12", intent: "problem_solving_search", text: "el piso está súper desnivelado, con qué lo puedo nivelar" },
+  { id: "C13", intent: "problem_solving_search", text: "tengo goteras en el techo, qué se usa para arreglar eso" },
+  { id: "C14", intent: "problem_solving_search", text: "qué hago para cortar la humedad que sube por la pared" },
+  { id: "C15", intent: "problem_solving_search", text: "se escucha todo a través de la pared, cómo la insonorizo" },
+  { id: "C16", intent: "problem_solving_search", text: "qué sellador uso en el baño para que no salga moho" },
 
   //------------------------------------
   // D. Comparison Searches
@@ -56,6 +77,15 @@ export const sampleIntentDocuments: SampleIntentDocument[] = [
   { id: "D6", intent: "comparison_search", text: "cerámica vs porcelanato para uso en exterior" },
   { id: "D7", intent: "comparison_search", text: "cables 12 AWG vs cables 14 AWG para casa" },
   { id: "D8", intent: "comparison_search", text: "pintura mate o satinada, cuál conviene más para sala" },
+  { id: "D9", intent: "comparison_search", text: "cerámica o porcelanato, cuál conviene para piso" },
+  { id: "D10", intent: "comparison_search", text: "qué es mejor para agua caliente, pvc o cpvc" },
+  { id: "D11", intent: "comparison_search", text: "hdpe vs pvc, cuál dura más bajo tierra" },
+  { id: "D12", intent: "comparison_search", text: "pintura acrílica o vinílica, cuál es mejor" },
+  { id: "D13", intent: "comparison_search", text: "mate vs satinada para sala" },
+  { id: "D14", intent: "comparison_search", text: "drywall vs bloque para interiores" },
+  { id: "D15", intent: "comparison_search", text: "varilla de 3/8 o de 1/2, cuál conviene para losa" },
+  { id: "D16", intent: "comparison_search", text: "qué conviene más, mortero o pega para cerámica" },
+
 
   //------------------------------------
   // E. Project-Based Searches
@@ -69,6 +99,7 @@ export const sampleIntentDocuments: SampleIntentDocument[] = [
   { id: "E6", intent: "project_based_search", text: "lista de materiales para construir una bodega" },
   { id: "E7", intent: "project_based_search", text: "materiales para levantar una pared de drywall" },
   { id: "E8", intent: "project_based_search", text: "qué materiales se necesitan para hacer una terraza" },
+  { id: "PB1", intent: "project_based_search", text: "lista de cosas para levantar una pared de drywall" },
 
   //------------------------------------
   // F. Budget or Bulk Searches
@@ -82,6 +113,18 @@ export const sampleIntentDocuments: SampleIntentDocument[] = [
   { id: "F6", intent: "bulk_or_budget_search", text: "comprar tubería PVC por volumen a mejor precio" },
   { id: "F7", intent: "bulk_or_budget_search", text: "materiales low cost para remodelación básica" },
   { id: "F8", intent: "bulk_or_budget_search", text: "ofertas de materiales de construcción al por mayor" },
+  { id: "F9", intent: "bulk_or_budget_search", text: "necesito cemento holcim en cantidad" },
+  { id: "F10", intent: "bulk_or_budget_search", text: "proveedor de tubería pvc por volumen" },
+  { id: "F11", intent: "bulk_or_budget_search", text: "mayorista de cerámica para obra" },
+  { id: "F12", intent: "bulk_or_budget_search", text: "pintura al por mayor para proyecto grande" },
+  { id: "F13", intent: "bulk_or_budget_search", text: "ofertas por cantidad en cemento" },
+  { id: "F14", intent: "bulk_or_budget_search", text: "materiales económicos para construcción" },
+  { id: "F15", intent: "bulk_or_budget_search", text: "piso cerámico barato para obra" },
+  { id: "F16", intent: "bulk_or_budget_search", text: "material barato para remodelar casa" },
+  { id: "F17", intent: "bulk_or_budget_search", text: "drywall por volumen para obra" },
+  { id: "F18", intent: "bulk_or_budget_search", text: "comprar malla electrosoldada en cantidad" },
+
+
 
   //------------------------------------
   // G. Price Queries
@@ -95,6 +138,17 @@ export const sampleIntentDocuments: SampleIntentDocument[] = [
   { id: "G6", intent: "price_query", text: "valor de la malla electrosoldada de 6 mm" },
   { id: "G7", intent: "price_query", text: "cuánto cuesta un taladro inalámbrico Dewalt" },
   { id: "G8", intent: "price_query", text: "precio del tubo HDPE de 32 mm por metro" },
+  { id: "G9", intent: "price_query", text: "en cuánto está la cerámica 60x60 por m2" },
+  { id: "G10", intent: "price_query", text: "a cómo está la cerámica 60x60 por m2" },
+  { id: "G11", intent: "price_query", text: "cuánto está el saco de cemento ahorita" },
+  { id: "G12", intent: "price_query", text: "a cómo está la varilla corrugada de 3/8" },
+  { id: "G13", intent: "price_query", text: "cuánto cuesta el metro del tubo hdpe 32" },
+  { id: "G14", intent: "price_query", text: "precio plancha drywall medio" },
+  { id: "G15", intent: "price_query", text: "a cómo el galón de pintura interior" },
+  { id: "G16", intent: "price_query", text: "a cómo está el cemento holcim 50kg" },
+  { id: "G17", intent: "price_query", text: "cuánto está el porcelanato por metro cuadrado" },
+  { id: "G18", intent: "price_query", text: "a cómo está el bloque de 15" },
+  { id: "G19", intent: "price_query", text: "cuánto cuesta la malla electrosoldada 6mm" },
 
   //------------------------------------
   // H. Navigation
@@ -107,6 +161,10 @@ export const sampleIntentDocuments: SampleIntentDocument[] = [
   { id: "H6", intent: "navigation", text: "Abrir configuración de la cuenta" },
   { id: "H7", intent: "navigation", text: "Mostrar el historial de compras" },
   { id: "H8", intent: "navigation", text: "Ir al menú principal" },
+  { id: "N4", intent: "navigation", text: "mostrar mis pedidos" },
+  { id: "N3", intent: "navigation", text: "ver el carrito" },
+  { id: "N5", intent: "navigation", text: "abrir la sección de facturas" },
+  { id: "N6", intent: "navigation", text: "ir a clientes" },
 
   //------------------------------------
   // I. Navigation with Parameters
@@ -116,7 +174,20 @@ export const sampleIntentDocuments: SampleIntentDocument[] = [
   { id: "I3", intent: "navigation_with_parameters", text: "Listar cotizaciones entre enero y marzo" },
   { id: "I4", intent: "navigation_with_parameters", text: "Mostrar facturas solo las que están pendientes de pago" },
   { id: "I5", intent: "navigation_with_parameters", text: "Ver pedidos realizados hoy" },
-  { id: "I6", intent: "navigation_with_parameters", text: "Mostrar productos con precio menor a 20 dólares" },
   { id: "I7", intent: "navigation_with_parameters", text: "Ver facturas del año 2023 únicamente" },
-  { id: "I8", intent: "navigation_with_parameters", text: "Listar cotizaciones del cliente Pérez" }
+  { id: "I8", intent: "navigation_with_parameters", text: "Listar cotizaciones del cliente Pérez" },
+  { id: "NP2", intent: "navigation_with_parameters", text: "listar pedidos de hoy" },
+  { id: "NP3", intent: "navigation_with_parameters", text: "mostrar facturas pendientes de pago" },
+  { id: "NP4", intent: "navigation_with_parameters", text: "abrir productos filtrados por categoría eléctricos" },
+  { id: "NP5", intent: "navigation_with_parameters", text: "ir a productos y filtrar por precio menor a 20 dólares" },
+  { id: "NP6", intent: "navigation_with_parameters", text: "ver cotizaciones entre enero y marzo" },
+
+
+  // { id: "U1", intent: "unknown", text: "hola" },
+  // { id: "U2", intent: "unknown", text: "necesito ayuda" },
+  // { id: "U3", intent: "unknown", text: "cuál es el clima hoy" },
+  // { id: "U4", intent: "unknown", text: "cómo reinicio mi contraseña del correo" },
+  // { id: "U5", intent: "unknown", text: "quiero hablar con un humano" },
+  // { id: "U6", intent: "unknown", text: "qué significa la vida" }
+
 ];

@@ -12,8 +12,7 @@ Chat Optimizer/
 │   └── api/
 │       └── intent/
 │           ├── embedding/route.ts    # Vector embedding intent classification
-│           ├── slm/route.ts          # SLM intent classification
-│           └── hybrid/route.ts       # Hybrid (embedding + SLM) classification
+│           └── slm/route.ts          # SLM intent classification
 ├── services/
 │   ├── VectorEmbeddingService.ts     # Vector embedding service (singleton)
 │   └── SLMService.ts                  # SLM classification service (singleton)
@@ -30,12 +29,7 @@ Chat Optimizer/
    npm install
    ```
 
-2. (Optional) Set up OpenAI API key for better embeddings and SLM:
-   ```bash
-   echo "OPENAI_API_KEY=sk-your-key-here" > .env.local
-   ```
-
-3. Run the development server:
+2. Run the development server:
    ```bash
    npm run dev
    ```
@@ -44,8 +38,30 @@ Open http://localhost:3000 to see the chat UI.
 
 ## API Endpoints
 
+## Ollama Setup
+
+To run everything locally you need [Ollama](https://ollama.com/).
+
+1. **Install Ollama**
+   ```bash
+   # macOS (Homebrew)
+   brew install ollama
+   # or follow https://ollama.com/download for other platforms
+   ```
+2. **Download required models**
+   ```bash
+   ollama pull nomic-embed-text
+   ollama pull phi3:instruct
+   ```
+3. **Start the Ollama server**
+   ```bash
+   ollama serve
+   ```
+
+## API Endpoints
+
 ### POST `/api/intent/embedding`
-Classifies intent using vector embedding similarity.
+Classifies intent using vector embedding similarity (nomic-embed-text via Ollama with deterministic fallback).
 
 **Request:**
 ```json
@@ -54,24 +70,24 @@ Classifies intent using vector embedding similarity.
 }
 ```
 
-**Response:**
+**Response (example):**
 ```json
 {
-  "message": "I have a billing question",
-  "method": "embedding",
-  "results": [
-    {
-      "intent": "billing",
-      "score": 0.85,
-      "text": "billing invoice charge payment subscription cost price"
-    }
+  "intent": {
+    "intent": "billing",
+    "score": 0.85,
+    "text": "billing invoice charge payment subscription cost price"
+  },
+  "candidates": [
+    { "intent": "billing", "score": 0.85, "text": "..." },
+    { "intent": "support", "score": 0.54, "text": "..." }
   ],
-  "topIntent": { "intent": "billing", "score": 0.85, "text": "..." }
+  "durationMs": 42
 }
 ```
 
 ### POST `/api/intent/slm`
-Classifies intent using Small Language Model (OpenAI or keyword fallback).
+Classifies intent through SLMService (Ollama `phi3:instruct` by default with keyword fallback).
 
 **Request:**
 ```json
@@ -80,34 +96,17 @@ Classifies intent using Small Language Model (OpenAI or keyword fallback).
 }
 ```
 
-**Response:**
+**Response (example):**
 ```json
 {
-  "message": "My app is crashing with errors",
-  "method": "slm",
   "classification": {
-    "intent": "support",
-    "confidence": 0.85,
-    "reason": "Matched support keywords"
+    "intent": "problem_solving_search",
+    "confidence": 0.81,
+    "params": {
+      "problem_description": "My app is crashing with errors"
+    },
+    "durationMs": 612
   }
-}
-```
-
-### POST `/api/intent/hybrid`
-Combines embedding lookup with SLM classification for improved accuracy.
-
-**Request:**
-```json
-{
-  "message": "I need help with billing"
-}
-```
-
-**Response:**
-```json
-{
-  "vectorMatches": [...],
-  "slm": { "intent": "billing", "confidence": 0.9, "reason": "..." }
 }
 ```
 
@@ -133,7 +132,7 @@ Combines embedding lookup with SLM classification for improved accuracy.
   - `classifyIntent(message: string, context?: string)` — Classify intent of a message
 
 **Features:**
-- Uses OpenAI Chat Completions if `OPENAI_API_KEY` is set
+- Uses Ollama (`phi3:instruct`) for intent classification
 - Falls back to keyword-based classification if no API key
 - Supports optional context for improved classification
 - Returns intent, confidence score, and explanation
@@ -154,16 +153,13 @@ curl -X POST http://localhost:3000/api/intent/slm \
   -d '{"message":"I was charged twice"}'
 ```
 
-### Hybrid Route
-```bash
-curl -X POST http://localhost:3000/api/intent/hybrid \
-  -H "Content-Type: application/json" \
-  -d '{"message":"Error: app crashed"}'
-```
-
 ## Environment Variables
 
-- `OPENAI_API_KEY` — OpenAI API key (optional, uses fallback if not set)
+- `OLLAMA_URL` — URL for the Ollama server (default `http://127.0.0.1:11434`)
+- `OLLAMA_SLM_MODEL` — Model used for SLM classification (default `phi3:instruct`)
+- `OLLAMA_EMBED_MODEL` — Model used for embeddings (default `nomic-embed-text`)
+- `OLLAMA_MAX_CONCURRENCY` — Max concurrent SLM requests (default `3`)
+- `OPENAI_API_KEY` — Optional; enables OpenAI-based fallbacks if you reconfigure services
 
 ## Scripts
 

@@ -29,7 +29,7 @@ export interface VectorIntentResponse {
 export class VectorEmbeddingService {
   private documents: Map<string, IntentDocument> = new Map();
   private cachedVectors: Map<string, EmbeddingVector> = new Map();
-  private readonly confidenceThreshold = 0.6;
+  private readonly confidenceThreshold = 0.65;
 
   constructor() {
     this.initializeSampleDocuments();

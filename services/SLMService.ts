@@ -36,12 +36,11 @@ export class SLMService {
     'unknown'
   ];
 
-  // Concurrency control
   private readonly maxConcurrency: number;
-  private activeRequests: number = 0;
+  private activeRequests = 0;
   private requestQueue: Array<{
     resolve: (value: SlmIntentResult | null) => void;
-    reject: (error: any) => void;
+    reject: (reason?: any) => void;
     message: string;
     context?: string;
     ollamaUrl: string;
@@ -49,7 +48,6 @@ export class SLMService {
   }> = [];
 
   constructor() {
-    // Default to 3 concurrent requests, configurable via env var
     this.maxConcurrency = parseInt(process.env.OLLAMA_MAX_CONCURRENCY || '3', 10) || 3;
   }
 
@@ -68,22 +66,13 @@ export class SLMService {
     const ollamaUrl = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
     const ollamaModel = process.env.OLLAMA_SLM_MODEL || 'phi3:instruct';
 
+    let result: SlmIntentResult | null = null;
     if (process.env.USE_OLLAMA !== 'false') {
-      try {
-        const result = await this.classifyWithOllamaWithRetries(message, context, ollamaUrl, ollamaModel, {
-          maxAttempts: 3,
-          baseDelayMs: 2000
-        });
-        if (result) {
-          return withDuration(result);
-        }
-      } catch (error) {
-        if (process.env.DEBUG_OLLAMA === 'true') {
-          console.error('Ollama request failed, falling back to keywords:', error);
-        }
-        if (!allowFallback) {
-          throw error;
-        }
+      result = await this.classifyWithOllamaLimited(message, context, ollamaUrl, ollamaModel);
+      console.log("prompt:", message)
+      console.log(JSON.stringify(result));
+      if (result) {
+        return withDuration(result);
       }
     }
 
@@ -93,143 +82,6 @@ export class SLMService {
 
     // Fallback to keyword matching only when allowed
     return withDuration(this.classifyWithKeywords(message));
-  }
-
-  private async waitForOllamaReady(baseUrl: string, timeoutMs: number = 30000, pollMs: number = 1000): Promise<void> {
-    const startedAt = Date.now();
-    while (true) {
-      try {
-        const res = await fetch(`${baseUrl}/api/tags`, { method: 'GET' });
-        if (res.ok) {
-          return;
-        }
-      } catch (err) {
-        // Ignore errors and keep polling until timeout
-      }
-
-      if (Date.now() - startedAt >= timeoutMs) {
-        throw new Error(`Ollama not ready after ${timeoutMs}ms`);
-      }
-
-      await this.delay(pollMs);
-    }
-  }
-
-  private async classifyWithOllamaWithRetries(
-    message: string,
-    context: string | undefined,
-    baseUrl: string,
-    model: string,
-    options: { maxAttempts: number; baseDelayMs: number }
-  ): Promise<SlmIntentResult | null> {
-    const { maxAttempts, baseDelayMs } = options;
-
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        await this.waitForOllamaReady(baseUrl);
-        const result = await this.classifyWithOllamaLimited(message, context, baseUrl, model);
-        if (result) {
-          return result;
-        }
-      } catch (error) {
-        if (!this.isRetryableOllamaError(error)) {
-          throw error;
-        }
-        if (attempt === maxAttempts) {
-          throw error;
-        }
-      }
-
-      if (attempt < maxAttempts) {
-        const delayMs = baseDelayMs * attempt;
-        await this.delay(delayMs);
-      }
-    }
-
-    return null;
-  }
-
-  private isRetryableOllamaError(error: any): boolean {
-    if (!error) {
-      return false;
-    }
-
-    const retryableCodes = ['ECONNREFUSED', 'ECONNRESET', 'ETIMEDOUT'];
-    const code = (error as any)?.code;
-    if (code && retryableCodes.includes(code)) {
-      return true;
-    }
-
-    const status = (error as any)?.status;
-    if (typeof status === 'number' && status >= 500 && status < 600) {
-      return true;
-    }
-
-    return false;
-  }
-
-  private async delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  /**
-   * Queue-based concurrency limiter for Ollama requests.
-   */
-  private async classifyWithOllamaLimited(
-    message: string,
-    context: string | undefined,
-    baseUrl: string,
-    model: string
-  ): Promise<SlmIntentResult | null> {
-    return new Promise((resolve, reject) => {
-      // Add to queue
-      this.requestQueue.push({
-        resolve: (result) => resolve(result),
-        reject,
-        message,
-        context,
-        ollamaUrl: baseUrl,
-        ollamaModel: model
-      });
-
-      // Process queue
-      this.processQueue();
-    });
-  }
-
-  /**
-   * Process the request queue respecting concurrency limits.
-   */
-  private async processQueue(): Promise<void> {
-    // Don't process if we're at max concurrency or queue is empty
-    if (this.activeRequests >= this.maxConcurrency || this.requestQueue.length === 0) {
-      return;
-    }
-
-    // Get next request from queue
-    const request = this.requestQueue.shift();
-    if (!request) {
-      return;
-    }
-
-    this.activeRequests++;
-
-    try {
-      const result = await this.classifyWithOllama(
-        request.message,
-        request.context,
-        request.ollamaUrl,
-        request.ollamaModel
-      );
-      // Resolve with Ollama result if successful, otherwise null (will trigger fallback in classifyIntent)
-      request.resolve(result);
-    } catch (error) {
-      request.reject(error);
-    } finally {
-      this.activeRequests--;
-      // Process next item in queue
-      this.processQueue();
-    }
   }
 
   /**
@@ -276,7 +128,7 @@ export class SLMService {
 
       const data = await res.json();
       const content = data?.response || '';
-
+      
       // Try to extract JSON from response
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
@@ -293,7 +145,6 @@ export class SLMService {
           
           // Extract params if present
           const params = parsed.params || {};
-
           return {
             intent,
             confidence,
@@ -316,6 +167,57 @@ export class SLMService {
         console.error('Ollama SLM error:', err);
       }
       return null;
+    }
+  }
+
+  /**
+   * Queue-based concurrency limiter for Ollama requests (max 3 at a time by default).
+   */
+  private classifyWithOllamaLimited(
+    message: string,
+    context: string | undefined,
+    baseUrl: string,
+    model: string
+  ): Promise<SlmIntentResult | null> {
+    return new Promise((resolve, reject) => {
+      this.requestQueue.push({
+        resolve,
+        reject,
+        message,
+        context,
+        ollamaUrl: baseUrl,
+        ollamaModel: model
+      });
+      this.processQueue();
+    });
+  }
+
+  private async processQueue(): Promise<void> {
+    if (this.activeRequests >= this.maxConcurrency || this.requestQueue.length === 0) {
+      return;
+    }
+
+    const request = this.requestQueue.shift();
+    if (!request) {
+      return;
+    }
+
+    this.activeRequests++;
+
+    try {
+      const result = await this.classifyWithOllama(
+        request.message,
+        request.context,
+        request.ollamaUrl,
+        request.ollamaModel
+      );
+      request.resolve(result);
+    } catch (error) {
+      request.reject(error);
+    } finally {
+      this.activeRequests--;
+      // Continue processing remaining queued requests
+      this.processQueue();
     }
   }
 
